@@ -433,16 +433,20 @@ target_include_directories(wave_tracer PRIVATE
     ${FREETYPE_INCLUDE_DIRS}
 )
 
-target_link_libraries(wave_tracer PRIVATE
-    stdc++fs atomic
+# stdc++fs/libatomic are gcc/linux link-time workarounds; neither exists on
+# macOS (libc++) or Windows (MSVC).
+if(NOT APPLE AND NOT WIN32)
+    target_link_libraries(wave_tracer PRIVATE stdc++fs atomic)
+endif()
 
+target_link_libraries(wave_tracer PRIVATE
     PNG::PNG
     $<IF:$<TARGET_EXISTS:libdeflate::libdeflate_shared>,libdeflate::libdeflate_shared,libdeflate::libdeflate_static>
     OpenEXR::OpenEXR
     Freetype::Freetype
 
     TBB::tbb
-    
+
     yaml-cpp::yaml-cpp
     pugixml::pugixml
 )

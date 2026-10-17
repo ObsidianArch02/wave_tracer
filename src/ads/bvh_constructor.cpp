@@ -184,7 +184,9 @@ bvh_constructor_t::bvh_constructor_t(
                     tbvhtris.emplace_back(u::to_m(t.c.x), u::to_m(t.c.y), u::to_m(t.c.z), 0);
                 }
 
-                tbvh.BuildAVX(tbvhtris.data(), tbvhtris.size()/3);
+                // Public reference builder; BuildAVX called directly is a
+                // fatal error on non-AVX targets (e.g. arm64).
+                tbvh.Build(tbvhtris.data(), tbvhtris.size()/3);
             }
 #else
             {

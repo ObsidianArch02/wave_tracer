@@ -165,7 +165,9 @@ inline auto XYZ_to_LAB(const vec3_t& XYZ, white_point_e whitepoint) noexcept {
         constexpr auto d3 = d*d*d;
 
         return t>d3 ?
-            m::pow<f_t>(t, f_t(1./3.)) :
+            // NOTE: no explicit template argument: new libc++ static_asserts on
+            // pow<float>(float,float) (both arg types equal the promoted type).
+            m::pow(t, f_t(1./3.)) :
             t * f_t(1./(3.*d*d)) + f_t(4./29.);
     };
 

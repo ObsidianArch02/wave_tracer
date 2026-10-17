@@ -10,6 +10,7 @@
 #pragma once
 
 #include <string>
+#include <cstdlib>
 
 #include <wt/math/common.hpp>
 #include <wt/math/quantity/defs.hpp>
@@ -40,7 +41,22 @@ inline bool parse_expression(std::istream &ss, f_t& val) {
         assert(p==0);
     }
     else {
-        if (!(ss >> val))
+        // Collect the numeric token by hand and parse it with strtod: newer
+        // libc++ num_get implementations reject a number that is immediately
+        // followed by unit letters (e.g. "2cm"), failing the extraction and
+        // discarding the whole token.
+        std::string tok;
+        while (!!ss) {
+            const auto c = ss.peek();
+            const bool numch = (c>='0' && c<='9') || c=='.' || c=='+' || c=='-' ||
+                               c=='e' || c=='E';
+            if (!numch) break;
+            tok += char(c);
+            ss.ignore();
+        }
+        char* end = nullptr;
+        val = f_t(std::strtod(tok.c_str(), &end));
+        if (end==tok.c_str())
             return false;
     }
 
